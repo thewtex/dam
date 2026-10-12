@@ -5,8 +5,8 @@ import stream from 'stream'
 const pipeline = util.promisify(stream.pipeline)
 
 import * as tar from 'tar'
-import { filesFromPaths } from 'files-from-path'
-import { createFileEncoderStream } from 'ipfs-car'
+import { importFile } from 'ipfs-unixfs-importer'
+import { BlackHoleBlockstore } from 'blockstore-core/black-hole'
 import decompress from 'decompress'
 
 import axios from 'axios'
@@ -26,16 +26,18 @@ export async function pack(dir, archivePath) {
   ['.'])
 }
 
-export async function cid(archivePath) {
-  const files = await filesFromPaths([archivePath,])
+// IPIP-499 CID profile: CIDv1, sha2-256, raw leaves, 1 MiB chunks,
+// balanced layout with 1024 links per node.
+// https://specs.ipfs.tech/ipips/ipip-0499/
+const cidProfile = 'unixfs-v1-2025'
 
-  let rootCid
-  await createFileEncoderStream(files[0]).pipeThrough(new TransformStream({
-    transform (block, controller) {
-      rootCid = block.cid
-      controller.enqueue(block)
-    }
-  })).pipeTo(new WritableStream())
+export async function cid(archivePath) {
+  // Only the root CID is needed, so the blocks are discarded as they are built
+  const { cid: rootCid } = await importFile(
+    { content: fs.createReadStream(archivePath) },
+    new BlackHoleBlockstore(),
+    { profile: cidProfile }
+  )
 
   return rootCid.toString()
 }
