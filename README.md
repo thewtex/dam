@@ -33,8 +33,10 @@ Pack the current version of the data into a compressed archive:
 
 ```sh
 > dam pack test/data test/data.tar.gz
-CID: bafkreibetv3747ysuplkqkwlomeaao3nk3uak7wtzgrgmrtvmah5jdyawy
+CID: bafkreibwa6fm266fgyxslebqz2we6l5a56akv2v5pj5ppi3cz2sxh4a4cm
 ```
+
+Packing is reproducible: the same files always produce the same archive and CID, regardless of when, where, or by whom they are packed.
 
 Upload the *test/data.tar.gz* file to hosting services such as an IPFS pinning service, GitHub Releases, AWS s3, a local http server, etc.
 
@@ -43,13 +45,13 @@ The CID is computed with the [IPIP-499](https://specs.ipfs.tech/ipips/ipip-0499/
 ```
 > ipfs config profile apply unixfs-v1-2025
 > ipfs add test/data.tar.gz
-added bafkreibetv3747ysuplkqkwlomeaao3nk3uak7wtzgrgmrtvmah5jdyawy data.tar.gz
+added bafkreibwa6fm266fgyxslebqz2we6l5a56akv2v5pj5ppi3cz2sxh4a4cm data.tar.gz
 ```
 
 In your NPM scripts, add
 
 ```sh
-> dam download -v test/data test/data.tar.gz bafkreibetv3747ysuplkqkwlomeaao3nk3uak7wtzgrgmrtvmah5jdyawy https://w3s.link/ipfs/bafkreibetv3747ysuplkqkwlomeaao3nk3uak7wtzgrgmrtvmah5jdyawy
+> dam download -v test/data test/data.tar.gz bafkreibwa6fm266fgyxslebqz2we6l5a56akv2v5pj5ppi3cz2sxh4a4cm https://w3s.link/ipfs/bafkreibwa6fm266fgyxslebqz2we6l5a56akv2v5pj5ppi3cz2sxh4a4cm
 ```
 
 If the data is stored at multiple locations, add all URLs to the end of the `download` subcommand.

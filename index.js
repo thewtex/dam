@@ -17,13 +17,31 @@ export async function pack(dir, archivePath) {
     process.exit(1)
   }
 
+  // portable drops owner, umask, and OS details so the same files always
+  // produce the same archive bytes, and therefore the same CID
   await tar.c({
     gzip: { level: 9 },
     file: archivePath,
     C: dir,
-    mtime: new Date(),
+    portable: true,
+    // Same fixed timestamp as npm pack
+    mtime: new Date('1985-10-26T08:15:00.000Z'),
+    noDirRecurse: true,
   },
-  ['.'])
+  ['.', ...sortedEntries(dir, '.')])
+}
+
+// Sorted, since readdir order depends on the filesystem. Symlinks are stored,
+// not followed, like node-tar's own directory recursion.
+function sortedEntries(dir, prefix) {
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .sort((a, b) => a.name < b.name ? -1 : 1)
+    .flatMap(dirent => {
+      const entry = `${prefix}/${dirent.name}`
+      return dirent.isDirectory()
+        ? [entry, ...sortedEntries(path.join(dir, dirent.name), entry)]
+        : [entry]
+    })
 }
 
 // IPIP-499 CID profile: CIDv1, sha2-256, raw leaves, 1 MiB chunks,
